@@ -1,5 +1,5 @@
 # Serial-to-JSON-UDP-translator
-Real time **Serial CSV** to **JSON UDP** stream translator
+Real time **Serial CSV** to **UDP JSON** stream translator
 
 <!-- ## General schema
 ![General schema](img/general-schema.png) -->
