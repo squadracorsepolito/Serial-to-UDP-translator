@@ -2,13 +2,40 @@ import socket
 import threading
 import json
 import time
+import serial
 
 # Constants
 LOCALHOST_IP = "127.0.0.1"
     
 # Open serial connection to the specified port
-def open_stream_serial(port):
-    return True
+def open_stream_serial(port, baudrate=9600, timeout=1):
+    try:
+        # Open serial connection
+        ser = serial.Serial(port, baudrate=baudrate, timeout=timeout)
+        if ser:
+            print(f"Serial port {port} is open")
+        return ser
+    except serial.SerialException as e:
+        print(f"Failed to open serial port {port}: {e}")
+
+def read_serial_data(ser, buffer_size=1024):
+    data_buffer = bytearray()  # Initialize an empty buffer to store data
+    def read_data_handler():
+        while True:
+            try:
+                # Read data from the serial port
+                data = ser.read(buffer_size)
+                if data:
+                    # Append the received data to the buffer
+                    data_buffer.extend(data)
+            except serial.SerialException as e:
+                print(f"Serial error occurred: {e}")
+                break
+        return data_buffer
+    
+    # Start the thread to read data from the serial port
+    read_serial_thread = threading.Thread(target=read_data_handler, daemon=True)
+    read_serial_thread.start()
 
 # Opens a UDP JSON streaming server on the specified port
 def open_stream_udp(port):
@@ -35,7 +62,7 @@ def open_stream_udp(port):
             except Exception as e:
                 print(f"Error handling client connection: {e}")
 
-        # Start the thread to handle PlotJuggler connections
+        # Start the thread to handle UDP connections
         stream_udp_thread = threading.Thread(target=handle_client, daemon=True)
         stream_udp_thread.start()
 

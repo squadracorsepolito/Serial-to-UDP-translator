@@ -1,5 +1,5 @@
 import tkinter as tk
-from backend.functions import open_stream_udp
+from backend.functions import open_stream_udp, open_stream_serial, read_serial_data
 import threading
 
 class GUI:
@@ -18,7 +18,7 @@ class GUI:
         self.screen_width = self.app.winfo_screenwidth()
         self.screen_height = self.app.winfo_screenheight()
         self.window_width = 500
-        self.window_height = 210
+        self.window_height = 250
         self.x_coordinate = (self.screen_width - self.window_width) // 2
         self.y_coordinate = (self.screen_height - self.window_height) // 2
 
@@ -27,7 +27,7 @@ class GUI:
         self.app.iconbitmap('img/icon.ico')
 
     # ---------- GUI ELEMENTS --------------------------------------------
-        self.label = tk.Label(self.app, text="Press connect to start converting Serial messages \nto JSON and stream them to UDP.")
+        self.label = tk.Label(self.app, text="Press connect to start converting Serial messages \nto JSON and stream them to UDP (localhost).")
         self.label.pack(pady=10)
 
         # Local UDP Port
@@ -36,6 +36,13 @@ class GUI:
         self.textbox_udp_port = tk.Text(self.app, height=1, width=30)
         self.textbox_udp_port.insert("1.0", "1000")                        # Default UDP port
         self.textbox_udp_port.pack()
+
+        # Serial Port
+        self.label_serial_port = tk.Label(self.app, text="Serial port:")
+        self.label_serial_port.pack()
+        self.textbox_serial_port = tk.Text(self.app, height=1, width=30)
+        self.textbox_serial_port.insert("1.0", "COM3")                        # Default Serial port
+        self.textbox_serial_port.pack()
 
         # Connect button
         self.connect_button = tk.Button(self.app, text="Connect", command=self.connect_thread, font=("Arial", 14, "bold"), width=15, height=2)
@@ -56,9 +63,14 @@ class GUI:
     def connect(self):
         # Get the port from the textbox
         udp_port = self.textbox_udp_port.get("1.0", "end-1c")
+        serial_port_name = self.textbox_serial_port.get("1.0", "end-1c")
 
         # TO DO: Add Serial connect functionality
         open_stream_udp(int(udp_port))
+        ser = open_stream_serial(serial_port_name)
+        if ser:
+            data_buffer = read_serial_data(ser)
+            # TO DO: call cnverter function
 
         self.label_connected.pack()
 
