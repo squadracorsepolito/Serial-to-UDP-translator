@@ -1,5 +1,5 @@
 import tkinter as tk
-from backend.functions import open_stream_udp, open_stream_serial, read_serial_data
+from backend.functions import start_connection_controller
 import threading
 
 class GUI:
@@ -65,12 +65,7 @@ class GUI:
         udp_port = self.textbox_udp_port.get("1.0", "end-1c")
         serial_port_name = self.textbox_serial_port.get("1.0", "end-1c")
 
-        # TO DO: Add Serial connect functionality
-        open_stream_udp(int(udp_port))
-        ser = open_stream_serial(serial_port_name)
-        if ser:
-            data_buffer = read_serial_data(ser)
-            # TO DO: call cnverter function
+        start_connection_controller(udp_port, serial_port_name)
 
         self.label_connected.pack()
 
