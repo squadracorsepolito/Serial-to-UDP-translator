@@ -14,7 +14,7 @@ pip install -r requirements.txt
 
 ### Build executable
 ```bash
-pyinstaller --name SCannerAdapter  main.py --onefile --windowed
+pyinstaller --name SerialToUdpTranslator  main.py --onefile --windowed
 ```
 
 ## Tech stack

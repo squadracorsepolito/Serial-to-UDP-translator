@@ -13,13 +13,13 @@ TIMEOUT = 1
 BUFFER_SIZE = 1024
 
 # Controller
-def start_connection_controller(udp_port, serial_port_name):
+def start_connection_controller(udp_port, serial_port_name, path_json_model):
     udp_socket = open_stream_udp(int(udp_port))
     ser_socket = open_stream_serial(serial_port_name)
     time.sleep(1)
     if udp_socket and ser_socket:
         print("Connection established")
-        read_serial_data(ser_socket, "CONFIG_TRANSLATION.json")   # TODO change the name of the config file
+        read_serial_data(ser_socket, path_json_model) 
 
     
 # Open serial connection to the specified port
