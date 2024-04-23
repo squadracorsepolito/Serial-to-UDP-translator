@@ -6,7 +6,7 @@ import threading
 class GUI:
     # Config parameters
     PATH_CONFIG_MODEL = "Path"
-    VALUES="example"
+    VALUES=["example1", "example2", "example3"]
     NEWLINE=b'\n'
     SEPARATOR=b','
     BAUDRATE=9600
@@ -92,7 +92,7 @@ class GUI:
         UDP_PORT = self.textbox_udp_port.get("1.0", "end-1c")
         SERIAL_PORT = self.textbox_serial_port.get("1.0", "end-1c")
 
-        start_connection_controller(UDP_PORT, SERIAL_PORT, self.VALUES)  # TO CHANGE PATH_CONFIG_MODEL functions.py
+        start_connection_controller(UDP_PORT, SERIAL_PORT, self.VALUES, self.NEWLINE, self.SEPARATOR, self.BAUDRATE)  
 
         self.label_connected.pack()
     

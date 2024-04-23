@@ -20,7 +20,7 @@ BAUDRATE=9600
 UDP_PORT=5000
 SERIAL_PORT=/dev/ttyUSB0
 ```
-The 'VALUES' params indicate the order of the values in the CSV string. The 'NULL' value indicates that the value is not going to be sent. The 'NEWLINE' param indicates the character that separates the CSV strings. The 'SEPARATOR' param indicates the character that separates the values in the CSV string. The 'BAUDRATE' param indicates the baudrate of the serial port. The 'UDP_PORT' param indicates the port of the UDP server. The 'SERIAL_PORT' param indicates the serial port to use.
+The 'VALUES' params indicate the order of the values in the CSV string. The 'NULL' value indicates that the value is not going to be sent, but discarded when the CSV comes into the program. The 'NEWLINE' param indicates the character that separates the CSV strings. The 'SEPARATOR' param indicates the character that separates the values in the CSV string. The 'BAUDRATE' param indicates the baudrate of the serial port. The 'UDP_PORT' param indicates the port of the UDP server. The 'SERIAL_PORT' param indicates the serial port to use.
 
 With this configuration you can send the following JSON (assuming CSV data is: 1,2,3,4\n):
 ```json
