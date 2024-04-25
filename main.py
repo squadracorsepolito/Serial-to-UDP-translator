@@ -91,6 +91,7 @@ class GUI:
         # Get the port from the textbox
         UDP_PORT = self.textbox_udp_port.get("1.0", "end-1c")
         SERIAL_PORT = self.textbox_serial_port.get("1.0", "end-1c")
+        self.save_to_config_file() # Save the paths to the CONFIG file for future reuse
 
         start_connection_controller(UDP_PORT, SERIAL_PORT, self.VALUES, self.NEWLINE, self.SEPARATOR, self.BAUDRATE)  
 
@@ -127,6 +128,14 @@ class GUI:
         self.textbox_udp_port.insert("1.0", str(self.UDP_PORT))
         self.textbox_serial_port.delete("1.0", tk.END)
         self.textbox_serial_port.insert("1.0", str(self.SERIAL_PORT))
-
+    
+    def save_to_config_file(self):
+        with open(self.PATH_CONFIG_MODEL, 'w') as f:
+            f.write(f'VALUES={self.VALUES}\n')
+            f.write(f'NEWLINE={self.NEWLINE}\n')
+            f.write(f'SEPARATOR={self.SEPARATOR}\n')
+            f.write(f'BAUDRATE={self.BAUDRATE}\n')
+            f.write(f'UDP_PORT={self.UDP_PORT}\n')
+            f.write(f'SERIAL_PORT={self.SERIAL_PORT}\n')
 
 GUI()
