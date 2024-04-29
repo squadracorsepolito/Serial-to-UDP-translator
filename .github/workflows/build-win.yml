@@ -26,14 +26,18 @@ jobs:
           name: SerialToUdpTranslator
           path: dist/SerialToUdpTranslatorV1.0.exe
 
+      - name: Generate Random String
+        id: random_string
+        run: echo "::set-output name=random_string::$(cat /dev/urandom | LC_CTYPE=C tr -dc 'a-zA-Z0-9' | fold -w 4 | head -n 1)"
+
       - name: Create release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.event.head_commit.message }}
-          release_name: ${{ github.event.head_commit.message }}
+          tag_name: ${{ github.event.head_commit.message }}-${{ steps.random_string.outputs.random_string }}
+          release_name: ${{ github.event.head_commit.message }}-${{ steps.random_string.outputs.random_string }}
           body: |
             Release v1.0.0
           draft: false
