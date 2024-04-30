@@ -41,7 +41,7 @@ jobs:
             CMD_BUILD: >
                 pyinstaller -F -w -n SerialToUdpTranslator-Mac-x64 -i resources/icon.icns main.py &&
                 cd dist/ &&
-                zip -r9 SerialToUdpTranslator SerialToUdpTranslator.app/                
+                zip -r9 SerialToUdpTranslator-Mac-x64 SerialToUdpTranslator-Mac-x64.app/                
             OUT_FILE_NAME: SerialToUdpTranslator-Mac-x64.zip
             ASSET_MIME: application/zip
           - os: windows-latest
