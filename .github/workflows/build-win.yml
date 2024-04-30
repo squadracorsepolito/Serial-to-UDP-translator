@@ -2,7 +2,7 @@ name: Build Workflow Windows
 
 on:
   push:
-    branches: master
+    branches: nope
 
 jobs:
   build-windows:
