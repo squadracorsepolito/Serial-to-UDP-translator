@@ -33,10 +33,9 @@ class GUI:
 
         # Set the geometry of the window to position it on the center of the screen
         self.app.geometry(f"{self.window_width}x{self.window_height}+{self.x_coordinate}+{self.y_coordinate}")
-        # self.app.iconbitmap('img/icon.ico')
 
     # ---------- GUI ELEMENTS --------------------------------------------
-        self.label = tk.Label(self.app, text="Press connect to start converting Serial messages \nto JSON and stream them to UDP (localhost).")
+        self.label = tk.Label(self.app, text="Press connect to start converting CSV Serial messages \nto JSON and stream them to UDP (localhost).")
         self.label.pack(pady=10)
 
         # Path to CONFIG

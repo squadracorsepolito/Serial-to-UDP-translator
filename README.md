@@ -1,8 +1,13 @@
 # Serial-to-JSON-UDP-translator
-Real time **Serial CSV** to **UDP JSON** stream translator
+Real time **Serial CSV** to **UDP JSON** stream translator.
 
-<!-- ## General schema
-![General schema](img/general-schema.png) -->
+The executables can be found in the **Releases** section.
+
+## App
+![App](img/app.png)
+
+## General logical schema
+![General schema](img/general-schema.png)
 
 ## How to use
 ### Install dependencies
@@ -22,7 +27,7 @@ SERIAL_PORT=/dev/ttyUSB0
 ```
 The 'VALUES' params indicate the order of the values in the CSV string. The 'NULL' value indicates that the value is not going to be sent, but discarded when the CSV comes into the program. The 'NEWLINE' param indicates the character that separates the CSV strings. The 'SEPARATOR' param indicates the character that separates the values in the CSV string. The 'BAUDRATE' param indicates the baudrate of the serial port. The 'UDP_PORT' param indicates the port of the UDP server. The 'SERIAL_PORT' param indicates the serial port to use.
 
-With this configuration you can send the following JSON (assuming CSV data is: 1,2,3,4\n):
+With the configuration shown above you can send the following JSON (assuming CSV data is: 1,2,3,4\n):
 ```json
 {
     "PARAM1": 1,
@@ -31,12 +36,21 @@ With this configuration you can send the following JSON (assuming CSV data is: 1
 }
 ```
 
-...
-
-### Build executable
+## Build executable
 ```bash
 pyinstaller --name SerialToUdpTranslator  main.py --onefile --windowed
 ```
+
+## Publish new release
+Replace 1.0 with your version.
+```bash
+git add .         
+git commit -m "v1.0"  
+git git tag -a v1.0 -m "Version 1.0"      
+git push origin master --tags   
+```   
+
+For a complete guide on how it works and how to publish a new release, check [this repo](https://github.com/Paolo-Beci/pyinstaller-all-os-gh-action).
 
 ## Tech stack
 - Python 3.12.2
