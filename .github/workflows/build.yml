@@ -39,19 +39,19 @@ jobs:
           - os: macos-latest
             TARGET: macos
             CMD_BUILD: >
-                pyinstaller -F -w -n SerialToUdpTranslator -i resources/icon.icns main.py &&
+                pyinstaller -F -w -n SerialToUdpTranslator-Mac-x64 -i resources/icon.icns main.py &&
                 cd dist/ &&
                 zip -r9 SerialToUdpTranslator SerialToUdpTranslator.app/                
             OUT_FILE_NAME: SerialToUdpTranslator-Mac-x64.zip
             ASSET_MIME: application/zip
           - os: windows-latest
             TARGET: windows
-            CMD_BUILD: pyinstaller -F -w -n SerialToUdpTranslator -i resources/icon.ico main.py
+            CMD_BUILD: pyinstaller -F -w -n SerialToUdpTranslator-Win-x64 -i resources/icon.ico main.py
             OUT_FILE_NAME: SerialToUdpTranslator-Win-x64.exe
             ASSET_MIME: application/vnd.microsoft.portable-executable
           - os: ubuntu-latest
             TARGET: linux
-            CMD_BUILD: pyinstaller -F -n SerialToUdpTranslator -i resources/icon.ico main.py
+            CMD_BUILD: pyinstaller -F -n SerialToUdpTranslator-Linux-x64 -i resources/icon.ico main.py
             OUT_FILE_NAME: SerialToUdpTranslator-Linux-x64
             ASSET_MIME: application/zip 
     steps:
