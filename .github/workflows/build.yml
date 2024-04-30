@@ -49,6 +49,11 @@ jobs:
             CMD_BUILD: pyinstaller -F -w -n SerialToUdpTranslator main.py
             OUT_FILE_NAME: SerialToUdpTranslator.exe
             ASSET_MIME: application/vnd.microsoft.portable-executable
+          - os: ubuntu-latest
+            TARGET: linux
+            CMD_BUILD: pyinstaller -F -n SerialToUdpTranslator main.py
+            OUT_FILE_NAME: SerialToUdpTranslator
+            ASSET_MIME: application/zip 
     steps:
     - uses: actions/checkout@v1
     - name: Set up Python 3.12
