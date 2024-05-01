@@ -128,9 +128,8 @@ class GUI:
         self.NEWLINE = self.textbox_newline.get("1.0", "end-1c")
         self.SEPARATOR = self.textbox_separator.get("1.0", "end-1c")
         self.BAUDRATE = self.textbox_baudrate.get("1.0", "end-1c")
-
         self.save_to_config_file() # Save the data to the CONFIG file for future reuse
-        print(f"Values: {self.VALUES}, Newline: {self.NEWLINE}, Separator: {self.SEPARATOR}, Baudrate: {self.BAUDRATE}, UDP Port: {self.UDP_PORT}, Serial Port: {self.SERIAL_PORT}")
+
         start_connection_controller(self.UDP_PORT, self.SERIAL_PORT, self.VALUES, self.NEWLINE, self.SEPARATOR, self.BAUDRATE, self.label_connected, self.connect_button)  
     
     def startup(self):

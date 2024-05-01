@@ -46,10 +46,9 @@ Replace 1.0 with your version.
 ```bash
 git add .         
 git commit -m "v1.0"  
-git git tag -a v1.0 -m "Version 1.0"      
+git tag -a v1.0 -m "Version 1.0"      
 git push origin master --tags   
 ```   
-
 For a complete guide on how it works and how to publish a new release, check [this repo](https://github.com/Paolo-Beci/pyinstaller-all-os-gh-action).
 
 ## Tech stack
