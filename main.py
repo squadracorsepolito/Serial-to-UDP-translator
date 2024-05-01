@@ -4,21 +4,22 @@ from backend.functions import start_connection_controller
 import threading
 
 class GUI:
-    # Config parameters
-    PATH_CONFIG_MODEL = "Path"
-    VALUES=["example1", "example2", "example3"]
-    NEWLINE=b'\n'
-    SEPARATOR=b','
-    BAUDRATE=9600
-    UDP_PORT=5000
-    SERIAL_PORT=b'/dev/ttyUSB0'
+    def __init__(self):    
 
-    # Flag
-    connected = False
-
-    def __init__(self):
         # Create a new instance of Tkinter application
         self.app = tk.Tk()
+
+        # Config parameters
+        self.PATH_CONFIG_MODEL = "Path"
+        self.VALUES=['example1','example2','example3']
+        self.NEWLINE=b';'
+        self.SEPARATOR=b','
+        self.BAUDRATE=9600
+        self.UDP_PORT=5000
+        self.SERIAL_PORT=b'/dev/ttyUSB0'
+
+        # Flag
+        self.connected = False
 
     # ---------- WINDOW SETTINGS ---------------------------------------
         self.app.title("Serial CSV to UDP JSON Translator")
@@ -27,7 +28,7 @@ class GUI:
         self.screen_width = self.app.winfo_screenwidth()
         self.screen_height = self.app.winfo_screenheight()
         self.window_width = 500
-        self.window_height = 320
+        self.window_height = 550
         self.x_coordinate = (self.screen_width - self.window_width) // 2
         self.y_coordinate = (self.screen_height - self.window_height) // 2
 
@@ -45,7 +46,35 @@ class GUI:
         self.textbox_path_config_model.pack()
         self.textbox_path_config_model.insert("1.0", self.PATH_CONFIG_MODEL)
         self.browse_button_config_model = tk.Button(self.app, text="Browse", command=self.browse_file_config_model)
-        self.browse_button_config_model.pack()
+        self.browse_button_config_model.pack(pady=10)
+
+        # Values
+        self.label_values = tk.Label(self.app, text="Insert data label values:")
+        self.label_values.pack()
+        self.textbox_values = tk.Text(self.app, height=1, width=50)
+        self.textbox_values.insert("1.0", self.VALUES)                        
+        self.textbox_values.pack()
+
+        # Newline
+        self.label_newline = tk.Label(self.app, text="Insert newline separator for the upcoming CSV stream:")
+        self.label_newline.pack()
+        self.textbox_newline = tk.Text(self.app, height=1, width=30)
+        self.textbox_newline.insert("1.0", self.NEWLINE)                        
+        self.textbox_newline.pack()
+
+        # Separator
+        self.label_separator = tk.Label(self.app, text="Insert single data separator for the upcoming CSV stream:")
+        self.label_separator.pack()
+        self.textbox_separator = tk.Text(self.app, height=1, width=30)
+        self.textbox_separator.insert("1.0", self.SEPARATOR)                        
+        self.textbox_separator.pack()
+
+        # Baudrate
+        self.label_baudrate = tk.Label(self.app, text="Insert baudrate of the serial signal:")
+        self.label_baudrate.pack()
+        self.textbox_baudrate = tk.Text(self.app, height=1, width=30)
+        self.textbox_baudrate.insert("1.0", self.BAUDRATE)                        
+        self.textbox_baudrate.pack()
 
         # Local UDP Port
         self.label_udp_port = tk.Label(self.app, text="Local UDP port:")
@@ -69,6 +98,10 @@ class GUI:
         self.label_connected = tk.Label(self.app, text="CONNECTED!", font=("Arial", 14, "bold"))
         self.label_connected.forget()
 
+        # Connected status
+        self.label_config_loaded = tk.Label(self.app, text="CONFIG loaded!", font=("Arial", 14, "bold"))
+        self.label_config_loaded.forget()
+
         # Start the Tkinter event loop
         self.app.mainloop()
 
@@ -80,6 +113,7 @@ class GUI:
         self.textbox_path_config_model.delete("1.0", tk.END)
         self.textbox_path_config_model.insert("1.0", self.PATH_CONFIG_MODEL)
 
+        self.label_config_loaded.pack()
         self.startup()
 
     def connect_thread(self):
@@ -88,36 +122,33 @@ class GUI:
 
     def connect(self):
         # Get the port from the textbox
-        UDP_PORT = self.textbox_udp_port.get("1.0", "end-1c")
-        SERIAL_PORT = self.textbox_serial_port.get("1.0", "end-1c")
-        self.save_to_config_file() # Save the paths to the CONFIG file for future reuse
+        self.UDP_PORT = self.textbox_udp_port.get("1.0", "end-1c")
+        self.SERIAL_PORT = self.textbox_serial_port.get("1.0", "end-1c")
+        self.VALUES = self.textbox_values.get("1.0", "end-1c").replace(" ", ",").split(",")
+        self.NEWLINE = self.textbox_newline.get("1.0", "end-1c")
+        self.SEPARATOR = self.textbox_separator.get("1.0", "end-1c")
+        self.BAUDRATE = self.textbox_baudrate.get("1.0", "end-1c")
 
-        start_connection_controller(UDP_PORT, SERIAL_PORT, self.VALUES, self.NEWLINE, self.SEPARATOR, self.BAUDRATE)  
-
-        self.label_connected.pack()
+        self.save_to_config_file() # Save the data to the CONFIG file for future reuse
+        print(f"Values: {self.VALUES}, Newline: {self.NEWLINE}, Separator: {self.SEPARATOR}, Baudrate: {self.BAUDRATE}, UDP Port: {self.UDP_PORT}, Serial Port: {self.SERIAL_PORT}")
+        start_connection_controller(self.UDP_PORT, self.SERIAL_PORT, self.VALUES, self.NEWLINE, self.SEPARATOR, self.BAUDRATE, self.label_connected, self.connect_button)  
     
     def startup(self):
-        config = {
-            'VALUES': '',
-            'NEWLINE': '',
-            'SEPARATOR': '',
-            'BAUDRATE': '',
-            'UDP_PORT': '',
-            'SERIAL_PORT': ''
-        }
         with open(self.PATH_CONFIG_MODEL, 'r') as f:
-            lines = f.readlines()
-            if lines:
-                for line in lines:
-                    for key in config.keys():
-                        if line.startswith(f'{key}='):
-                            config[key] = line.split('=')[1].strip()
-        self.VALUES = config['VALUES']
-        self.NEWLINE = config['NEWLINE']
-        self.SEPARATOR = config['SEPARATOR']
-        self.BAUDRATE = config['BAUDRATE']
-        self.UDP_PORT = config['UDP_PORT']
-        self.SERIAL_PORT = config['SERIAL_PORT']
+            for line in f:
+                name, value = line.strip().split('=')
+                if name == 'BAUDRATE':
+                    self.BAUDRATE = value
+                elif name == 'NEWLINE':
+                    self.NEWLINE = value
+                elif name == 'SEPARATOR':
+                    self.SEPARATOR = value
+                elif name == 'UDP_PORT':
+                    self.UDP_PORT = value
+                elif name == 'SERIAL_PORT':
+                    self.SERIAL_PORT = value
+                elif name == 'VALUES':
+                    self.VALUES = value
 
         # Update the interface with new values
         self.update_interface()
@@ -127,14 +158,25 @@ class GUI:
         self.textbox_udp_port.insert("1.0", str(self.UDP_PORT))
         self.textbox_serial_port.delete("1.0", tk.END)
         self.textbox_serial_port.insert("1.0", str(self.SERIAL_PORT))
+        self.textbox_values.delete("1.0", tk.END)
+        self.textbox_values.insert("1.0", str(self.VALUES))
+        self.textbox_newline.delete("1.0", tk.END)
+        self.textbox_newline.insert("1.0", str(self.NEWLINE))
+        self.textbox_separator.delete("1.0", tk.END)
+        self.textbox_separator.insert("1.0", str(self.SEPARATOR))
+        self.textbox_baudrate.delete("1.0", tk.END)
+        self.textbox_baudrate.insert("1.0", str(self.BAUDRATE))
     
     def save_to_config_file(self):
-        with open(self.PATH_CONFIG_MODEL, 'w') as f:
-            f.write(f'VALUES={self.VALUES}\n')
-            f.write(f'NEWLINE={self.NEWLINE}\n')
-            f.write(f'SEPARATOR={self.SEPARATOR}\n')
-            f.write(f'BAUDRATE={self.BAUDRATE}\n')
-            f.write(f'UDP_PORT={self.UDP_PORT}\n')
-            f.write(f'SERIAL_PORT={self.SERIAL_PORT}\n')
+        values_string = " ".join(self.VALUES)
+
+        if self.PATH_CONFIG_MODEL != "Path":
+            with open(self.PATH_CONFIG_MODEL, 'w') as f:
+                f.write(f'VALUES={values_string}\n')
+                f.write(f'NEWLINE={self.NEWLINE}\n')
+                f.write(f'SEPARATOR={self.SEPARATOR}\n')
+                f.write(f'BAUDRATE={self.BAUDRATE}\n')
+                f.write(f'UDP_PORT={self.UDP_PORT}\n')
+                f.write(f'SERIAL_PORT={self.SERIAL_PORT}')
 
 GUI()

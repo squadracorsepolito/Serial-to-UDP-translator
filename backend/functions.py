@@ -11,14 +11,18 @@ BUFFER_SIZE = 1024
 TIMEOUT = 1
 
 # Controller
-def start_connection_controller(UDP_PORT, SERIAL_PORT, VALUES, NEWLINE, SEPARATOR, BAUDRATE):
+def start_connection_controller(UDP_PORT, SERIAL_PORT, VALUES, NEWLINE, SEPARATOR, BAUDRATE, label_connected, connect_button):
     udp_socket = open_stream_udp(int(UDP_PORT))
     ser_socket = open_stream_serial(SERIAL_PORT, BAUDRATE)
     time.sleep(1)
+    
     if udp_socket and ser_socket:
         print("Connection established")
-        read_serial_data(ser_socket, VALUES, NEWLINE, SEPARATOR, UDP_PORT)
-
+        read_serial_data(ser_socket, udp_socket, VALUES, NEWLINE, SEPARATOR, UDP_PORT)
+        label_connected.pack()
+        connect_button.config(state="disabled")
+    else:
+        print("Failed to establish connection")
     
 # Open serial connection to the specified port
 def open_stream_serial(SERIAL_PORT, BAUDRATE):
@@ -28,6 +32,7 @@ def open_stream_serial(SERIAL_PORT, BAUDRATE):
         if ser:
             print(f"Serial port {SERIAL_PORT} is open")
         return ser
+
     except serial.SerialException as e:
         print(f"Failed to open serial port {SERIAL_PORT}: {e}")
 
@@ -44,68 +49,74 @@ def open_stream_udp(UDP_PORT):
         print(f"Error opening JSON streaming server: {e}")
 
 # Read data from the serial port
-def read_serial_data(ser, VALUES, NEWLINE, SEPARATOR, UDP_PORT):
-    data_buffer = bytearray()  # Initialize an empty buffer to store data
-    def read_data_handler():
+def read_serial_data(ser_socket, udp_socket, VALUES, NEWLINE, SEPARATOR, UDP_PORT):
+    data_buffer = ""
+    def read_data_handler(data_buffer):
         while True:
             try:
                 # Read data from the serial port
-                data = ser.read(BUFFER_SIZE)
+                data = ser_socket.read(BUFFER_SIZE).decode('utf-8')
+            
                 if data:
                     # Append the received data to the buffer
-                    data_buffer.extend(data)
+                    data_buffer += data
                     
-                    # Check if there's a complete line terminated by a comma
+                    # Check if there's a complete line terminated by a newline character
                     while NEWLINE in data_buffer:
-                        # Find the index of the first comma
+                        # Find the index of the first newline character
                         line_index = data_buffer.find(NEWLINE)
-                        
-                        # Extract the line up to the comma
+                    
+                        # Extract the line up to the newline character
                         line = data_buffer[:line_index + 1]
                         
                         # Remove the extracted line from the buffer
                         data_buffer = data_buffer[line_index + len(NEWLINE):]
-                        
-                        # Process the line (conver to json and send it to the UDP server)
-                        csv_to_json(line, UDP_PORT, VALUES, SEPARATOR)
 
-            except serial.SerialException as e:
-                print(f"Serial error occurred: {e}")
+                        print(f"Received line: {line}")
+                        
+                        # Process the line (convert to json and send it to the UDP server)
+                        csv_to_json(udp_socket, line, UDP_PORT, VALUES, SEPARATOR)
+
+            except Exception as e:
+                print(f"Error occurred in the serial data handler: {e}")
                 break
-        return data_buffer
     
     # Start the thread to read data from the serial port
-    read_serial_thread = threading.Thread(target=read_data_handler, daemon=True)
+    read_serial_thread = threading.Thread(target=read_data_handler, args=(data_buffer,), daemon=True)
     read_serial_thread.start()
 
 # Converter Serial CSV stream to JSON converter
-def csv_to_json(message_csv, UDP_PORT, VALUES, SEPARATOR):
-    # Read the configuration from the JSON file
-    config_data = read_config(config_file)
-    if config_data is None:
-        return
-    
-    # Split the CSV data by comma
-    csv_parts = message_csv.strip().split(SEPARATOR)
+def csv_to_json(udp_socket, line_csv, UDP_PORT, VALUES, SEPARATOR):
+    try:
+        # Split the CSV data by comma
+        csv_parts = line_csv.strip().split(SEPARATOR)
 
-    # Initialize a dictionary to hold the JSON data
-    json_data = {}
+        # Initialize a dictionary to hold the JSON data
+        json_data = {}
 
-    # Loop through each value and its corresponding csv part
-    for value, csv_part in zip(VALUES, csv_parts):
-        # Check if the csv part is not NULL
-        if csv_part != "NULL":
-            # Add the value and csv part to the json_data dictionary
-            json_data[value] = int(csv_part)
+        # Loop through each value and its corresponding csv part
+        for value, csv_part in zip(VALUES, csv_parts):
+            # Check if the csv part is not NULL
+            if value != "NOPE":
+                # Add the value and csv part to the json_data dictionary
+                json_data[value] = csv_part.strip()
 
-    # Send the data to the UDP server
-    send_json_to_udp(json_data, UDP_PORT)
+        # Send the data to the UDP server
+        send_json_to_udp(udp_socket, json_data, UDP_PORT)
+
+    except Exception as e:
+        print(f"Error converting CSV to JSON: {e}")
 
 # Send JSON data to the UDP server
-def send_json_to_udp(json_data, UDP_PORT):
+def send_json_to_udp(udp_socket, json_data, UDP_PORT):
     try:
+        print(f"Sending JSON data: {json_data}")
+        # Serialize the JSON data to a string
+        json_string = json.dumps(json_data)
+        # Encode the JSON string to bytes
+        json_bytes = json_string.encode('utf-8')
         # Send JSON data to the server
-        client_socket.sendto(json_data.encode(), (LOCALHOST_IP, UDP_PORT))    # Check with cmd:  nc -ul <UDP_PORT>
+        udp_socket.sendto(json_bytes, (LOCALHOST_IP, int(UDP_PORT)))    # Check with cmd:  nc -ul <UDP_PORT>
 
     except Exception as e:
         print(f"Error sending JSON data to UDP server: {e}")
