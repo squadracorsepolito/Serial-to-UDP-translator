@@ -51,6 +51,13 @@ def open_stream_udp(UDP_PORT):
 # Read data from the serial port
 def read_serial_data(ser_socket, udp_socket, VALUES, NEWLINE, SEPARATOR, UDP_PORT):
     data_buffer = ""
+
+    # NEWLINE translation of special characters
+    if NEWLINE == "LF":
+        NEWLINE = "\n"
+    elif NEWLINE == "CRLF":
+        NEWLINE = "\r\n"
+
     def read_data_handler(data_buffer):
         while True:
             try:

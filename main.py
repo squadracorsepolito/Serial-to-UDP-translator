@@ -12,11 +12,11 @@ class GUI:
         # Config parameters
         self.PATH_CONFIG_MODEL = "Path"
         self.VALUES=['example1','example2','example3']
-        self.NEWLINE=b';'
-        self.SEPARATOR=b','
+        self.NEWLINE=';'
+        self.SEPARATOR=','
         self.BAUDRATE=9600
         self.UDP_PORT=5000
-        self.SERIAL_PORT=b'/dev/ttyUSB0'
+        self.SERIAL_PORT='/dev/ttyUSB0'
 
         # Flag
         self.connected = False
@@ -49,14 +49,14 @@ class GUI:
         self.browse_button_config_model.pack(pady=10)
 
         # Values
-        self.label_values = tk.Label(self.app, text="Insert data label values:")
+        self.label_values = tk.Label(self.app, text="Insert data label values, separated by spaces:")
         self.label_values.pack()
         self.textbox_values = tk.Text(self.app, height=1, width=50)
         self.textbox_values.insert("1.0", self.VALUES)                        
         self.textbox_values.pack()
 
         # Newline
-        self.label_newline = tk.Label(self.app, text="Insert newline separator for the upcoming CSV stream:")
+        self.label_newline = tk.Label(self.app, text="Insert newline separator for the upcoming CSV stream. \nInsert LF->'\\n' and CRLF->'\\r\\n':")
         self.label_newline.pack()
         self.textbox_newline = tk.Text(self.app, height=1, width=30)
         self.textbox_newline.insert("1.0", self.NEWLINE)                        
