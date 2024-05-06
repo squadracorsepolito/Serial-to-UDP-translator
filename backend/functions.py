@@ -85,11 +85,13 @@ def read_serial_data(ser_socket, udp_socket, VALUES, NEWLINE, SEPARATOR, UDP_POR
                         # Remove the extracted line from the buffer
                         data_buffer = data_buffer[line_index + len(NEWLINE):]
 
-                        print(f"Received line: {line}")
+                        #print(f"Received line: {line}") #DEBUG
                         
                         # Process the line (convert to json and send it to the UDP server)
                         csv_to_json(udp_socket, line, UDP_PORT, VALUES, SEPARATOR)
 
+            except serial.SerialException as e:
+                break
             except Exception as e:
                 print(f"Error occurred in the serial data handler: {e}")
                 break
@@ -123,7 +125,7 @@ def csv_to_json(udp_socket, line_csv, UDP_PORT, VALUES, SEPARATOR):
 # Send JSON data to the UDP server
 def send_json_to_udp(udp_socket, json_data, UDP_PORT):
     try:
-        print(f"Sending JSON data: {json_data}")
+        #print(f"Sending JSON data: {json_data}")  #DEBUG
         # Serialize the JSON data to a string
         json_string = json.dumps(json_data)
         # Encode the JSON string to bytes
