@@ -1,7 +1,8 @@
 import tkinter as tk
 from tkinter import filedialog
-from backend.functions import start_connection_controller
+from backend.functions import start_connection_controller, disconnect
 import threading
+import time
 
 class GUI:
     def __init__(self):    
@@ -21,6 +22,9 @@ class GUI:
         # Flag
         self.connected = False
 
+        global controller_thread
+        controller_thread = None
+
     # ---------- WINDOW SETTINGS ---------------------------------------
         self.app.title("Serial CSV to UDP JSON Translator")
 
@@ -28,79 +32,85 @@ class GUI:
         self.screen_width = self.app.winfo_screenwidth()
         self.screen_height = self.app.winfo_screenheight()
         self.window_width = 500
-        self.window_height = 550
+        self.window_height = 580
         self.x_coordinate = (self.screen_width - self.window_width) // 2
         self.y_coordinate = (self.screen_height - self.window_height) // 2
 
         # Set the geometry of the window to position it on the center of the screen
         self.app.geometry(f"{self.window_width}x{self.window_height}+{self.x_coordinate}+{self.y_coordinate}")
+        self.frame = tk.Frame(self.app)
+        self.frame.pack(pady=20)
 
     # ---------- GUI ELEMENTS --------------------------------------------
-        self.label = tk.Label(self.app, text="Press connect to start converting CSV Serial messages \nto JSON and stream them to UDP (localhost).")
-        self.label.pack(pady=10)
+        self.label = tk.Label(self.frame, text="Press connect to start converting CSV Serial messages \nto JSON and stream them to UDP (localhost).")
+        self.label.grid(row=0, column=1, columnspan=10, pady=10)
 
         # Path to CONFIG
-        self.label_path_config_model = tk.Label(self.app, text="Select path to CONFIG model to use:")
-        self.label_path_config_model.pack()
-        self.textbox_path_config_model = tk.Text(self.app, height=1, width=50)
-        self.textbox_path_config_model.pack()
+        self.label_path_config_model = tk.Label(self.frame, text="Select path to CONFIG model to use:")
+        self.label_path_config_model.grid(row=1, column=1, columnspan=10)
+        self.textbox_path_config_model = tk.Text(self.frame, height=1, width=50)
+        self.textbox_path_config_model.grid(row=2, column=1, columnspan=10)
         self.textbox_path_config_model.insert("1.0", self.PATH_CONFIG_MODEL)
-        self.browse_button_config_model = tk.Button(self.app, text="Browse", command=self.browse_file_config_model)
-        self.browse_button_config_model.pack(pady=10)
+        self.browse_button_config_model = tk.Button(self.frame, text="Browse", command=self.browse_file_config_model)
+        self.browse_button_config_model.grid(row=3, column=1, columnspan=10, pady=10)
 
         # Values
-        self.label_values = tk.Label(self.app, text="Insert data label values, separated by spaces:")
-        self.label_values.pack()
-        self.textbox_values = tk.Text(self.app, height=1, width=50)
+        self.label_values = tk.Label(self.frame, text="Insert data label values, separated by spaces:")
+        self.label_values.grid(row=4, column=1, columnspan=10)
+        self.textbox_values = tk.Text(self.frame, height=1, width=50)
         self.textbox_values.insert("1.0", self.VALUES)                        
-        self.textbox_values.pack()
+        self.textbox_values.grid(row=5, column=1, columnspan=10)
 
         # Newline
-        self.label_newline = tk.Label(self.app, text="Insert newline separator for the upcoming CSV stream. \nInsert LF->'\\n' and CRLF->'\\r\\n':")
-        self.label_newline.pack()
-        self.textbox_newline = tk.Text(self.app, height=1, width=30)
+        self.label_newline = tk.Label(self.frame, text="Insert newline separator for the upcoming CSV stream. \nInsert LF->'\\n' and CRLF->'\\r\\n':")
+        self.label_newline.grid(row=6, column=1, columnspan=10)
+        self.textbox_newline = tk.Text(self.frame, height=1, width=30)
         self.textbox_newline.insert("1.0", self.NEWLINE)                        
-        self.textbox_newline.pack()
+        self.textbox_newline.grid(row=7, column=1, columnspan=10)
 
         # Separator
-        self.label_separator = tk.Label(self.app, text="Insert single data separator for the upcoming CSV stream:")
-        self.label_separator.pack()
-        self.textbox_separator = tk.Text(self.app, height=1, width=30)
+        self.label_separator = tk.Label(self.frame, text="Insert single data separator for the upcoming CSV stream:")
+        self.label_separator.grid(row=8, column=1, columnspan=10)
+        self.textbox_separator = tk.Text(self.frame, height=1, width=30)
         self.textbox_separator.insert("1.0", self.SEPARATOR)                        
-        self.textbox_separator.pack()
+        self.textbox_separator.grid(row=9, column=1, columnspan=10)
 
         # Baudrate
-        self.label_baudrate = tk.Label(self.app, text="Insert baudrate of the serial signal:")
-        self.label_baudrate.pack()
-        self.textbox_baudrate = tk.Text(self.app, height=1, width=30)
+        self.label_baudrate = tk.Label(self.frame, text="Insert baudrate of the serial signal:")
+        self.label_baudrate.grid(row=10, column=1, columnspan=10)
+        self.textbox_baudrate = tk.Text(self.frame, height=1, width=30)
         self.textbox_baudrate.insert("1.0", self.BAUDRATE)                        
-        self.textbox_baudrate.pack()
+        self.textbox_baudrate.grid(row=11, column=1, columnspan=10)
 
         # Local UDP Port
-        self.label_udp_port = tk.Label(self.app, text="Local UDP port:")
-        self.label_udp_port.pack()
-        self.textbox_udp_port = tk.Text(self.app, height=1, width=30)
+        self.label_udp_port = tk.Label(self.frame, text="Local UDP port:")
+        self.label_udp_port.grid(row=12, column=1, columnspan=10)
+        self.textbox_udp_port = tk.Text(self.frame, height=1, width=30)
         self.textbox_udp_port.insert("1.0", self.UDP_PORT)                        
-        self.textbox_udp_port.pack()
+        self.textbox_udp_port.grid(row=13, column=1, columnspan=10)
 
         # Serial Port
-        self.label_serial_port = tk.Label(self.app, text="Serial port:")
-        self.label_serial_port.pack()
-        self.textbox_serial_port = tk.Text(self.app, height=1, width=30)
+        self.label_serial_port = tk.Label(self.frame, text="Serial port:")
+        self.label_serial_port.grid(row=14, column=1, columnspan=10)
+        self.textbox_serial_port = tk.Text(self.frame, height=1, width=30)
         self.textbox_serial_port.insert("1.0", self.SERIAL_PORT)                       
-        self.textbox_serial_port.pack()
+        self.textbox_serial_port.grid(row=15, column=1, columnspan=10)
 
         # Connect button
-        self.connect_button = tk.Button(self.app, text="Connect", command=self.connect_thread, font=("Arial", 14, "bold"), width=15, height=2)
-        self.connect_button.pack(pady=15)
+        self.connect_button = tk.Button(self.frame, text="Connect", command=self.connect_thread, font=("Arial", 14, "bold"), width=7, height=2)
+        self.connect_button.grid(row=16, column=0, columnspan=5, pady=15)
+
+        # Disconnect button
+        self.disconnect_button = tk.Button(self.frame, text="Disconnect", command=self.disconnect, font=("Arial", 14, "bold"), width=7, height=2, state="disabled")
+        self.disconnect_button.grid(row=16, column=7, columnspan=5, pady=15)
 
         # Connected status
-        self.label_connected = tk.Label(self.app, text="CONNECTED!", font=("Arial", 14, "bold"))
-        self.label_connected.forget()
+        self.label_connected = tk.Label(self.frame, text="CONNECTED!", font=("Arial", 14, "bold"))
+        self.label_connected.grid_forget()
 
-        # Connected status
-        self.label_config_loaded = tk.Label(self.app, text="CONFIG loaded!", font=("Arial", 14, "bold"))
-        self.label_config_loaded.forget()
+        # CONFIG status
+        self.label_config_loaded = tk.Label(self.frame, text="CONFIG loaded!", font=("Arial", 14, "bold"))
+        self.label_config_loaded.grid_forget()
 
         # Start the Tkinter event loop
         self.app.mainloop()
@@ -113,12 +123,14 @@ class GUI:
         self.textbox_path_config_model.delete("1.0", tk.END)
         self.textbox_path_config_model.insert("1.0", self.PATH_CONFIG_MODEL)
 
-        self.label_config_loaded.pack()
+        self.label_config_loaded.grid(row=17, column=1, columnspan=10)
         self.startup()
 
     def connect_thread(self):
+        global controller_thread
         # Start a new thread for the connect function
-        threading.Thread(target=self.connect, daemon=True).start()
+        controller_thread = threading.Thread(target=self.connect, daemon=True)
+        controller_thread.start()
 
     def connect(self):
         # Get the port from the textbox
@@ -130,8 +142,24 @@ class GUI:
         self.BAUDRATE = self.textbox_baudrate.get("1.0", "end-1c")
         self.save_to_config_file() # Save the data to the CONFIG file for future reuse
 
-        start_connection_controller(self.UDP_PORT, self.SERIAL_PORT, self.VALUES, self.NEWLINE, self.SEPARATOR, self.BAUDRATE, self.label_connected, self.connect_button)  
+        start_connection_controller(self.UDP_PORT, self.SERIAL_PORT, self.VALUES, self.NEWLINE, self.SEPARATOR, self.BAUDRATE, self.label_connected, self.connect_button, self.disconnect_button)  
     
+    def disconnect(self):
+        global controller_thread
+        # Stop the controller thread if it's running
+        if controller_thread:
+            disconnect()
+            time.sleep(1)
+            controller_thread.join()
+            self.connect_button.config(state="active")
+            self.disconnect_button.config(state="disabled")
+            self.label_connected.grid_forget()
+            self.label_config_loaded.grid_forget()
+            controller_thread = None
+            print("Disconnected")
+        else:
+            return
+
     def startup(self):
         with open(self.PATH_CONFIG_MODEL, 'r') as f:
             for line in f:

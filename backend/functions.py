@@ -10,8 +10,12 @@ LOCALHOST_IP = "127.0.0.1"
 BUFFER_SIZE = 1024
 TIMEOUT = 1
 
+udp_socket = None
+ser_socket = None
+
 # Controller
-def start_connection_controller(UDP_PORT, SERIAL_PORT, VALUES, NEWLINE, SEPARATOR, BAUDRATE, label_connected, connect_button):
+def start_connection_controller(UDP_PORT, SERIAL_PORT, VALUES, NEWLINE, SEPARATOR, BAUDRATE, label_connected, connect_button, disconnect_button):
+    global udp_socket, ser_socket
     udp_socket = open_stream_udp(int(UDP_PORT))
     ser_socket = open_stream_serial(SERIAL_PORT, BAUDRATE)
     time.sleep(1)
@@ -19,10 +23,12 @@ def start_connection_controller(UDP_PORT, SERIAL_PORT, VALUES, NEWLINE, SEPARATO
     if udp_socket and ser_socket:
         print("Connection established")
         read_serial_data(ser_socket, udp_socket, VALUES, NEWLINE, SEPARATOR, UDP_PORT)
-        label_connected.pack()
+        label_connected.grid(row=18, column=1, columnspan=10)
         connect_button.config(state="disabled")
+        disconnect_button.config(state="active")
     else:
-        print("Failed to establish connection")
+        disconnect()
+        print("Failed to establish connection, disconnecting...")
     
 # Open serial connection to the specified port
 def open_stream_serial(SERIAL_PORT, BAUDRATE):
@@ -127,3 +133,14 @@ def send_json_to_udp(udp_socket, json_data, UDP_PORT):
 
     except Exception as e:
         print(f"Error sending JSON data to UDP server: {e}")
+
+# Disconnect from the serial and UDP servers
+def disconnect():
+    try:
+        global udp_socket, ser_socket
+        if udp_socket:
+            udp_socket.close()
+        if ser_socket:
+            ser_socket.close()
+    except Exception as e:
+        print(f"Error disconnecting: {e}")
