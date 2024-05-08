@@ -125,7 +125,8 @@ class GUI:
     def connect_thread(self):
         global controller_thread
         # Start a new thread for the connect function
-        controller_thread = threading.Thread(target=self.connect, daemon=True).start()
+        controller_thread = threading.Thread(target=self.connect, daemon=True)
+        controller_thread.start()
 
     def connect(self):
         # Get the port from the textbox
