@@ -6,7 +6,6 @@ import time
 
 class GUI:
     def __init__(self):    
-
         # Create a new instance of Tkinter application
         self.app = tk.Tk()
 
@@ -19,9 +18,6 @@ class GUI:
         self.UDP_PORT=5000
         self.SERIAL_PORT='/dev/ttyUSB0'
 
-        # Flag
-        self.connected = False
-
         global controller_thread
         controller_thread = None
 
@@ -32,7 +28,7 @@ class GUI:
         self.screen_width = self.app.winfo_screenwidth()
         self.screen_height = self.app.winfo_screenheight()
         self.window_width = 500
-        self.window_height = 580
+        self.window_height = 600
         self.x_coordinate = (self.screen_width - self.window_width) // 2
         self.y_coordinate = (self.screen_height - self.window_height) // 2
 
@@ -97,11 +93,11 @@ class GUI:
         self.textbox_serial_port.grid(row=15, column=1, columnspan=10)
 
         # Connect button
-        self.connect_button = tk.Button(self.frame, text="Connect", command=self.connect_thread, font=("Arial", 14, "bold"), width=7, height=2)
+        self.connect_button = tk.Button(self.frame, text="Connect", command=self.connect_thread, font=("Arial", 14, "bold"), width=8, height=2)
         self.connect_button.grid(row=16, column=0, columnspan=5, pady=15)
 
         # Disconnect button
-        self.disconnect_button = tk.Button(self.frame, text="Disconnect", command=self.disconnect, font=("Arial", 14, "bold"), width=7, height=2, state="disabled")
+        self.disconnect_button = tk.Button(self.frame, text="Disconnect", command=self.disconnect, font=("Arial", 14, "bold"), width=8, height=2, state="disabled")
         self.disconnect_button.grid(row=16, column=7, columnspan=5, pady=15)
 
         # Connected status
@@ -129,8 +125,7 @@ class GUI:
     def connect_thread(self):
         global controller_thread
         # Start a new thread for the connect function
-        controller_thread = threading.Thread(target=self.connect, daemon=True)
-        controller_thread.start()
+        controller_thread = threading.Thread(target=self.connect, daemon=True).start()
 
     def connect(self):
         # Get the port from the textbox

@@ -85,7 +85,7 @@ def read_serial_data(ser_socket, udp_socket, VALUES, NEWLINE, SEPARATOR, UDP_POR
                         # Remove the extracted line from the buffer
                         data_buffer = data_buffer[line_index + len(NEWLINE):]
 
-                        print(f"Received line: {line}") #DEBUG
+                        #print(f"Received line: {line}") #DEBUG
                         
                         # Process the line (convert to json and send it to the UDP server)
                         csv_to_json(udp_socket, line, UDP_PORT, VALUES, SEPARATOR)
@@ -113,8 +113,17 @@ def csv_to_json(udp_socket, line_csv, UDP_PORT, VALUES, SEPARATOR):
         for value, csv_part in zip(VALUES, csv_parts):
             # Check if the csv part is not NULL
             if value != "NOPE":
+                # Convert value to int or float if possible
+                try:
+                    csv_part = int(csv_part)  # Try converting to integer
+                except ValueError:
+                    try:
+                        csv_part = float(csv_part)  # Try converting to float
+                    except ValueError:
+                        pass  # If not convertible, keep the value as string
+
                 # Add the value and csv part to the json_data dictionary
-                json_data[value] = csv_part.strip()
+                json_data[value] = csv_part
 
         # Send the data to the UDP server
         send_json_to_udp(udp_socket, json_data, UDP_PORT)
@@ -125,13 +134,11 @@ def csv_to_json(udp_socket, line_csv, UDP_PORT, VALUES, SEPARATOR):
 # Send JSON data to the UDP server
 def send_json_to_udp(udp_socket, json_data, UDP_PORT):
     try:
-        print(f"Sending JSON data: {json_data}")  #DEBUG
         # Serialize the JSON data to a string
-        json_string = json.dumps(json_data)
-        # Encode the JSON string to bytes
-        json_bytes = json_string.encode('utf-8')
+        json_bytes = json.dumps(json_data).encode('utf-8')
         # Send JSON data to the server
         udp_socket.sendto(json_bytes, (LOCALHOST_IP, int(UDP_PORT)))    # Check with cmd:  nc -ul <UDP_PORT>
+        #print(f"Sending JSON data: {json_data}")  #DEBUG
 
     except Exception as e:
         print(f"Error sending JSON data to UDP server: {e}")
