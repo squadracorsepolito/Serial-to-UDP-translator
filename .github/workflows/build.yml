@@ -40,7 +40,7 @@ jobs:
             # MEMO TODO: Add version number to the app name, zip does not supports dots, you have to use - instead
             TARGET: macos
             CMD_BUILD: >
-                pyinstaller -F -n SerialToUdpTranslator-Mac-x64 -i resources/icon.icns main.py &&
+                pyinstaller -F -w -n SerialToUdpTranslator-Mac-x64 -i resources/icon.icns main.py &&
                 cd dist/ &&
                 zip -r9 SerialToUdpTranslator-Mac-x64 SerialToUdpTranslator-Mac-x64.app/                
             OUT_FILE_NAME: SerialToUdpTranslator-Mac-x64.zip
