@@ -11,7 +11,7 @@ class GUI:
 
         # Config parameters
         self.PATH_CONFIG_MODEL = "Path"
-        self.VALUES=['example1','example2','example3']
+        self.VALUES=['example1,example2,example3']
         self.NEWLINE=';'
         self.SEPARATOR=','
         self.BAUDRATE=9600
@@ -171,7 +171,7 @@ class GUI:
                 elif name == 'SERIAL_PORT':
                     self.SERIAL_PORT = value
                 elif name == 'VALUES':
-                    self.VALUES = value
+                    self.VALUES = value.replace(' ', '_').strip()
 
         # Update the interface with new values
         self.update_interface()
@@ -191,7 +191,7 @@ class GUI:
         self.textbox_baudrate.insert("1.0", str(self.BAUDRATE))
     
     def save_to_config_file(self):
-        values_string = " ".join(self.VALUES)
+        values_string = ",".join(self.VALUES)
 
         if self.PATH_CONFIG_MODEL != "Path":
             with open(self.PATH_CONFIG_MODEL, 'w') as f:
