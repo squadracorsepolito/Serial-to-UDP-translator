@@ -3,12 +3,10 @@ from tkinter import filedialog
 from backend.functions import start_connection_controller, disconnect
 import threading
 import time
+import argparse
 
 class GUI:
-    def __init__(self):    
-        # Create a new instance of Tkinter application
-        self.app = tk.Tk()
-
+    def __init__(self, config_path=None, direct_connect=False):    
         # Config parameters
         self.PATH_CONFIG_MODEL = "Path"
         self.VALUES=['example1,example2,example3']
@@ -20,6 +18,22 @@ class GUI:
 
         global controller_thread
         controller_thread = None
+        self.connect_button = None
+        self.label_connected = None
+        self.label_connected = None
+        self.disconnect_button = None
+        
+        # Load configuration if a path was provided
+        if config_path:
+            self.PATH_CONFIG_MODEL = config_path
+            self.startup()
+
+        if direct_connect:
+            self.connect(direct=True)
+            return
+
+        # Create a new instance of Tkinter application
+        self.app = tk.Tk()
 
     # ---------- WINDOW SETTINGS ---------------------------------------
         self.app.title("Serial CSV to UDP JSON Translator")
@@ -108,6 +122,12 @@ class GUI:
         self.label_config_loaded = tk.Label(self.frame, text="CONFIG loaded!", font=("Arial", 14, "bold"))
         self.label_config_loaded.grid_forget()
 
+        # Load config if provided
+        if config_path:
+            self.PATH_CONFIG_MODEL = config_path
+            self.startup()
+            self.update_interface()
+
         # Start the Tkinter event loop
         self.app.mainloop()
 
@@ -121,6 +141,8 @@ class GUI:
 
         self.label_config_loaded.grid(row=17, column=1, columnspan=10)
         self.startup()
+        # Update the interface with new values
+        self.update_interface()
 
     def connect_thread(self):
         global controller_thread
@@ -128,18 +150,22 @@ class GUI:
         controller_thread = threading.Thread(target=self.connect, daemon=True)
         controller_thread.start()
 
-    def connect(self):
-        # Get the port from the textbox
-        self.UDP_PORT = self.textbox_udp_port.get("1.0", "end-1c")
-        self.SERIAL_PORT = self.textbox_serial_port.get("1.0", "end-1c")
-        self.VALUES = self.textbox_values.get("1.0", "end-1c").replace(" ", ",").split(",")
-        self.NEWLINE = self.textbox_newline.get("1.0", "end-1c")
-        self.SEPARATOR = self.textbox_separator.get("1.0", "end-1c")
-        self.BAUDRATE = self.textbox_baudrate.get("1.0", "end-1c")
-        self.save_to_config_file() # Save the data to the CONFIG file for future reuse
+    def connect(self, direct=False):
+        if not direct:
+            # Get the port from the textbox
+            self.UDP_PORT = self.textbox_udp_port.get("1.0", "end-1c")
+            self.SERIAL_PORT = self.textbox_serial_port.get("1.0", "end-1c")
+            self.VALUES = self.textbox_values.get("1.0", "end-1c").replace(" ", ",").split(",")
+            self.NEWLINE = self.textbox_newline.get("1.0", "end-1c")
+            self.SEPARATOR = self.textbox_separator.get("1.0", "end-1c")
+            self.BAUDRATE = self.textbox_baudrate.get("1.0", "end-1c")
+            self.save_to_config_file() # Save the data to the CONFIG file for future reuse
 
-        start_connection_controller(self.UDP_PORT, self.SERIAL_PORT, self.VALUES, self.NEWLINE, self.SEPARATOR, self.BAUDRATE, self.label_connected, self.connect_button, self.disconnect_button)  
-    
+        try:
+            start_connection_controller(self.UDP_PORT, self.SERIAL_PORT, self.VALUES, self.NEWLINE, self.SEPARATOR, self.BAUDRATE, self.label_connected, self.connect_button, self.disconnect_button)
+        except Exception as e:
+            print(f"Connection failed: {e}")
+
     def disconnect(self):
         global controller_thread
         # Stop the controller thread if it's running
@@ -173,10 +199,9 @@ class GUI:
                 elif name == 'VALUES':
                     self.VALUES = value.replace(' ', '_').strip()
 
-        # Update the interface with new values
-        self.update_interface()
-
     def update_interface(self):
+        self.textbox_path_config_model.delete("1.0", tk.END)
+        self.textbox_path_config_model.insert("1.0", self.PATH_CONFIG_MODEL)
         self.textbox_udp_port.delete("1.0", tk.END)
         self.textbox_udp_port.insert("1.0", str(self.UDP_PORT))
         self.textbox_serial_port.delete("1.0", tk.END)
@@ -202,4 +227,10 @@ class GUI:
                 f.write(f'UDP_PORT={self.UDP_PORT}\n')
                 f.write(f'SERIAL_PORT={self.SERIAL_PORT}')
 
-GUI()
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Start the Serial CSV to UDP JSON Translator GUI.")
+    parser.add_argument('--config', type=str, help='Path to the configuration file')
+    parser.add_argument('--nogui', action='store_true', default=False, help='Connect directly without showing the GUI')
+    args = parser.parse_args()
+
+    gui = GUI(config_path=args.config, direct_connect=args.nogui)
