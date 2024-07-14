@@ -39,10 +39,10 @@ With the configuration shown above you can send the following JSON (assuming CSV
 ### Command-line run option
 It is possible to run the program directly from the command line (for example) with the following command:
 ```bash
-./SerialToUdpTranslator-v2.8.2-Win-x64.exe -config ./CONFIG.txt -nogui
-#./NameOfTheExecutable -config ./CONFIG.txt -nogui
+./SerialToUdpTranslator-v2.8.2-Win-x64.exe --config ./CONFIG.txt --nogui
+#./NameOfTheExecutable -config ./CONFIG.txt --nogui
 ```
-Where you can specify the path of the configuration file `CONFIG.txt` file (explained above) and the `-nogui` flag to run the program without the GUI.
+Where you can specify the path of the configuration file `--config` -> `CONFIG.txt` file (explained above) and the `--nogui` flag to run the program without the GUI.
 
 ## How to pair with Plotjuggler graphing tool
 1. Open Plotjuggler
