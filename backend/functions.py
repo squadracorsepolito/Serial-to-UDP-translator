@@ -3,7 +3,6 @@ import threading
 import json
 import time
 import serial
-import json
 
 # Constants
 LOCALHOST_IP = "127.0.0.1"
@@ -23,9 +22,12 @@ def start_connection_controller(UDP_PORT, SERIAL_PORT, VALUES, NEWLINE, SEPARATO
     if udp_socket and ser_socket:
         print("Connection established")
         read_serial_data(ser_socket, udp_socket, VALUES, NEWLINE, SEPARATOR, UDP_PORT)
-        label_connected.grid(row=18, column=1, columnspan=10)
-        connect_button.config(state="disabled")
-        disconnect_button.config(state="active")
+        if label_connected:
+            label_connected.grid(row=18, column=1, columnspan=10)
+        if connect_button:
+            connect_button.config(state="disabled")
+        if disconnect_button:
+            disconnect_button.config(state="active")
     else:
         disconnect()
         print("Failed to establish connection, disconnecting...")
@@ -39,7 +41,7 @@ def open_stream_serial(SERIAL_PORT, BAUDRATE):
             print(f"Serial port {SERIAL_PORT} is open")
         return ser
 
-    except serial.SerialException as e:
+    except Exception as e:
         print(f"Failed to open serial port {SERIAL_PORT}: {e}")
 
 # Open a UDP JSON streaming server on the specified port
@@ -146,6 +148,7 @@ def send_json_to_udp(udp_socket, json_data, UDP_PORT):
 # Disconnect from the serial and UDP servers
 def disconnect():
     try:
+        print("Disconnecting...")
         global udp_socket, ser_socket
         if udp_socket:
             udp_socket.close()

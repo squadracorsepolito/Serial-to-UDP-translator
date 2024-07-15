@@ -29,7 +29,7 @@ class GUI:
             self.startup()
 
         if direct_connect:
-            self.connect(direct=True)
+            self.connect_thread(direct=True)
             return
 
         # Create a new instance of Tkinter application
@@ -144,21 +144,27 @@ class GUI:
         # Update the interface with new values
         self.update_interface()
 
-    def connect_thread(self):
+    def connect_thread(self, direct=False):
         global controller_thread
         # Start a new thread for the connect function
-        controller_thread = threading.Thread(target=self.connect, daemon=True)
+        controller_thread = threading.Thread(target=self.connect, args=(direct,), daemon=True)
         controller_thread.start()
 
     def connect(self, direct=False):
         if not direct:
             # Get the port from the textbox
-            self.UDP_PORT = self.textbox_udp_port.get("1.0", "end-1c")
-            self.SERIAL_PORT = self.textbox_serial_port.get("1.0", "end-1c")
-            self.VALUES = self.textbox_values.get("1.0", "end-1c").replace(" ", ",").split(",")
-            self.NEWLINE = self.textbox_newline.get("1.0", "end-1c")
-            self.SEPARATOR = self.textbox_separator.get("1.0", "end-1c")
-            self.BAUDRATE = self.textbox_baudrate.get("1.0", "end-1c")
+            if hasattr(self, 'textbox_udp_port'):
+                self.UDP_PORT = self.textbox_udp_port.get("1.0", "end-1c")
+            if hasattr(self, 'textbox_serial_port'):
+                self.SERIAL_PORT = self.textbox_serial_port.get("1.0", "end-1c")
+            if hasattr(self, 'textbox_values'):
+                self.VALUES = self.textbox_values.get("1.0", "end-1c").replace(" ", ",").split(",")
+            if hasattr(self, 'textbox_newline'):
+                self.NEWLINE = self.textbox_newline.get("1.0", "end-1c")
+            if hasattr(self, 'textbox_separator'):
+                self.SEPARATOR = self.textbox_separator.get("1.0", "end-1c")
+            if hasattr(self, 'textbox_baudrate'):
+                self.BAUDRATE = self.textbox_baudrate.get("1.0", "end-1c")
             self.save_to_config_file() # Save the data to the CONFIG file for future reuse
 
         try:
