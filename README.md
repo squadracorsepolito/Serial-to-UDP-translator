@@ -19,6 +19,8 @@ pip install -r requirements.txt
 To configure the parameters of the program you have to create a `CONFIG.txt` file with the following parameters:
 ```txt
 VALUES=PARAM1,PARAM2,NULL,PARAM3
+AUTO_DETECT=True
+AUTO_DETECT_FLAG=###
 NEWLINE=;
 SEPARATOR=,
 BAUDRATE=9600
@@ -39,10 +41,22 @@ With the configuration shown above you can send the following JSON (assuming CSV
 ### Command-line run option
 It is possible to run the program directly from the command line (for example) with the following command:
 ```bash
-./SerialToUdpTranslator-v2.8.2-Win-x64.exe --config ./CONFIG.txt --nogui
-#./NameOfTheExecutable --config ./CONFIG.txt --nogui
+./SerialToUdpTranslator-v2.8.2-Win-x64.exe --config ./CONFIG.txt --autodetect <starting flag> --nogui
+#./NameOfTheExecutable --config ./CONFIG.txt --autodetect <starting flag> --nogui
 ```
-Where you can specify the path of the configuration file `--config` -> `CONFIG.txt` file (explained above) and the `--nogui` flag to run the program without the GUI.
+Where you can specify the path of the configuration file `--config` -> `CONFIG.txt` file (explained above) and the `--nogui` flag to run the program without the GUI. 
+You can also specify the `--autodetect` flag to start the program with the autodetection of the `<starting flag>` in order to automatically discover the parameters that will be passed to the program as first message (note that if you want to use special characters like ### you have to pass them via CONFIG file above), for example:
+```txt
+starting flag -> ###
+first message -> ###,PARAM1,PARAM2,NULL,PARAM3
+second message -> 1,2,3,4
+parsing result:
+{
+    "PARAM1": 1,
+    "PARAM2": 2,
+    "PARAM3": 4
+}
+```
 
 ## How to pair with Plotjuggler graphing tool
 1. Open Plotjuggler

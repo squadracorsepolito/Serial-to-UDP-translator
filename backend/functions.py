@@ -11,17 +11,19 @@ TIMEOUT = 1
 
 udp_socket = None
 ser_socket = None
+values = []
 
 # Controller
-def start_connection_controller(UDP_PORT, SERIAL_PORT, VALUES, NEWLINE, SEPARATOR, BAUDRATE, label_connected, connect_button, disconnect_button):
-    global udp_socket, ser_socket
+def start_connection_controller(UDP_PORT, SERIAL_PORT, VALUES, NEWLINE, SEPARATOR, BAUDRATE, AUTO_DETECT, AUTO_DETECT_FLAG, label_connected, connect_button, disconnect_button):
+    global udp_socket, ser_socket, values
     udp_socket = open_stream_udp(int(UDP_PORT))
     ser_socket = open_stream_serial(SERIAL_PORT, BAUDRATE)
+    values = VALUES
     time.sleep(1)
     
     if udp_socket and ser_socket:
         print("Connection established")
-        read_serial_data(ser_socket, udp_socket, VALUES, NEWLINE, SEPARATOR, UDP_PORT)
+        read_serial_data(ser_socket, udp_socket, NEWLINE, SEPARATOR, UDP_PORT, AUTO_DETECT, AUTO_DETECT_FLAG)
         if label_connected:
             label_connected.grid(row=18, column=1, columnspan=10)
         if connect_button:
@@ -57,7 +59,7 @@ def open_stream_udp(UDP_PORT):
         print(f"Error opening JSON streaming server: {e}")
 
 # Read data from the serial port
-def read_serial_data(ser_socket, udp_socket, VALUES, NEWLINE, SEPARATOR, UDP_PORT):
+def read_serial_data(ser_socket, udp_socket, NEWLINE, SEPARATOR, UDP_PORT, AUTO_DETECT, AUTO_DETECT_FLAG):
     data_buffer = ""
 
     # NEWLINE translation of special characters
@@ -90,7 +92,7 @@ def read_serial_data(ser_socket, udp_socket, VALUES, NEWLINE, SEPARATOR, UDP_POR
                         #print(f"Received line: {line}") #DEBUG
                         
                         # Process the line (convert to json and send it to the UDP server)
-                        csv_to_json(udp_socket, line, UDP_PORT, VALUES, SEPARATOR)
+                        csv_to_json(udp_socket, line, UDP_PORT, SEPARATOR, AUTO_DETECT, AUTO_DETECT_FLAG)
 
             except serial.SerialException as e:
                 break
@@ -103,24 +105,35 @@ def read_serial_data(ser_socket, udp_socket, VALUES, NEWLINE, SEPARATOR, UDP_POR
     read_serial_thread.start()
 
 # Converter Serial CSV stream to JSON converter
-def csv_to_json(udp_socket, line_csv, UDP_PORT, VALUES, SEPARATOR):
+def csv_to_json(udp_socket, line_csv, UDP_PORT, SEPARATOR, AUTO_DETECT, AUTO_DETECT_FLAG):
+    global values
     try:
         # Split the CSV data by comma
         csv_parts = line_csv.strip().split(SEPARATOR)
+
+        if AUTO_DETECT:
+            if csv_parts[0] == AUTO_DETECT_FLAG:
+                values = [csv_parts[i] for i in range(1, len(csv_parts))]
+                print(f"Auto-detected values: {values}")
+                return
+        else:
+            # Check if VALUES are default and replace them with param1, param2, param3, ...
+            if not values or values == ['']: 
+                values = [f"param{i+1}" for i in range(len(csv_parts))]
 
         # Initialize a dictionary to hold the JSON data
         json_data = {}
 
         # Loop through each value and its corresponding csv part
-        for value, csv_part in zip(VALUES, csv_parts):
+        for value, csv_part in zip(values, csv_parts):
             # Check if the csv part is not NULL
             if value != "NOPE":
                 # Convert value to int or float if possible
                 try:
-                    csv_part = int(csv_part)  # Try converting to integer
+                    csv_part = int(csv_part) 
                 except ValueError:
                     try:
-                        csv_part = float(csv_part)  # Try converting to float
+                        csv_part = float(csv_part) 
                     except ValueError:
                         pass  # If not convertible, keep the value as string
 
